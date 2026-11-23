@@ -1,0 +1,12 @@
+[run]
+source = app
+omit =
+    app/__init__.py
+
+[report]
+show_missing = true
+skip_covered = false
+fail_under = 80
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:

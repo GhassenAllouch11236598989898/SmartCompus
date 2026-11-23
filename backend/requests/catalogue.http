@@ -1,0 +1,85 @@
+### SmartCampus AI — collection de requêtes SA-20 / SA-21
+### (VS Code « REST Client » ou JetBrains HTTP Client)
+### Jeton de dev : docker compose exec api python -m scripts.issue_token admin@demo.smartcampus.invalid
+
+@base = http://localhost:8000/api/v1
+@adminToken = COLLER_ICI_LE_JWT_ADMIN
+@respIitToken = COLLER_ICI_LE_JWT_RESPONSABLE_IIT
+
+### Santé
+GET {{base}}/health
+
+### Disponibilité base
+GET {{base}}/health/ready
+
+### Liste publique (formations publiées), pagination
+GET {{base}}/formations?page=1&taille=10
+
+### Filtres : établissement + type de parcours
+GET {{base}}/formations?etablissement=IIT&type_parcours=INGENIERIE
+
+### Filtre durée (semestres) + tri
+GET {{base}}/formations?duree_min=4&duree_max=6&tri=duree
+
+### Recherche plein texte
+GET {{base}}/formations?q=intelligence%20artificielle
+
+### Brouillons (rôle de gestion requis, sinon 403)
+GET {{base}}/formations?statut=draft
+Authorization: Bearer {{adminToken}}
+
+### Détail
+GET {{base}}/formations/3
+
+### Tarifs (toutes années)
+GET {{base}}/formations/3/tarifs
+
+### Tarifs d'une année académique
+GET {{base}}/formations/3/tarifs?annee_academique=2026-2027
+
+### Conditions d'admission + prérequis
+GET {{base}}/formations/3/conditions-admission?annee_academique=2026-2027
+
+### Comparer 2 à 3 formations
+GET {{base}}/formations/comparer?ids=1,2,3
+
+### Comparaison invalide (1 seul id) -> 422
+GET {{base}}/formations/comparer?ids=1
+
+### Créer (admin ou responsable de l'établissement)
+POST {{base}}/formations
+Authorization: Bearer {{respIitToken}}
+Content-Type: application/json
+
+{
+  "institution_id": 1,
+  "program_type_id": 3,
+  "code": "IIT-ING-DATA",
+  "title": "Cycle ingénieur Data (DEMO)",
+  "summary": "Exemple de création.",
+  "duration_semesters": 6,
+  "study_mode": "on_site",
+  "source_document_id": 1,
+  "status": "draft"
+}
+
+### Sans jeton -> 401
+POST {{base}}/formations
+Content-Type: application/json
+
+{}
+
+### Modifier partiellement
+PATCH {{base}}/formations/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "summary": "Résumé mis à jour" }
+
+### Archiver (aucune suppression physique)
+POST {{base}}/formations/1/archiver
+Authorization: Bearer {{adminToken}}
+
+### DELETE -> 405
+DELETE {{base}}/formations/1
+Authorization: Bearer {{adminToken}}
