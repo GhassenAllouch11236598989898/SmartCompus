@@ -34,6 +34,7 @@ from app.models.catalog import (
     SourceDocument,
     TuitionFee,
 )
+from app.models.documents import EMBEDDING_DIM, DocumentChunk, SyncJob, SyncLog
 from app.models.identity import Role, User, UserRole
 
 __all__ = [name for name in dir() if not name.startswith("_")]
