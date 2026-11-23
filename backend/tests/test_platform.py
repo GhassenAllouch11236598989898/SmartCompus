@@ -36,6 +36,12 @@ def test_uniform_error_format(client, method, url, status):
     assert set(body) == {"error"} and {"code", "message", "details"} == set(body["error"])
 
 
+def test_malformed_json_body(client, auth):
+    r = client.post(API, content=b'{"title": ', headers={**auth("admin"), "Content-Type": "application/json"})
+    assert r.status_code in (400, 422)
+    assert set(r.json()["error"]) == {"code", "message", "details"}
+
+
 def test_validation_errors_do_not_echo_input(client):
     r = client.get(API, params={"taille": "secret-value"})
     assert "secret-value" not in r.text

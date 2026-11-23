@@ -43,7 +43,8 @@ def test_pagination(client):
     ({"duree_max": 4}, {"IIT-PREPA-MP", "ISB-MAS-MKT"}),
     ({"duree_min": 6, "etablissement": "IIT"}, {"IIT-LIC-INFO", "IIT-ING-GI"}),
     ({"q": "intelligence artificielle"}, {"IIT-ING-GI"}),
-    ({"q": "marketing"}, {"ISB-MAS-MKT"}),
+    ({"q": "marketing"}, {"ISB-MAS-MKT", "ISB-LIC-GEST"}),  # contenu de la licence cite le marketing
+    ({"q": "e-commerce"}, {"ISB-MAS-MKT"}),
     ({"q": "100%_"}, set()),
     ({"etablissement": "INCONNU"}, set()),
 ])

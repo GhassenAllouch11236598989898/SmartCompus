@@ -4,7 +4,7 @@ name: smartcampus
 
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:${POSTGRES_IMAGE_TAG:-pg17}
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_SUPERUSER:?voir .env.example}

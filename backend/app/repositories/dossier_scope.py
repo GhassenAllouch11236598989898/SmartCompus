@@ -10,7 +10,7 @@
 Les routes /responsable/* et /dossiers/me (hors SA-10) DOIVENT passer par ce filtre.
 """
 
-from sqlalchemy import Select, exists, false, select
+from sqlalchemy import Select, exists, false, or_, select
 
 from app.models import AdmissionCampaign, Appointment, Candidate, Dossier, User
 from app.models.identity import RoleCode

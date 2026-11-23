@@ -54,7 +54,14 @@ class User(IdMixin, TimestampMixin, DemoMixin, Base):
     is_service_account: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    roles: Mapped[list[Role]] = relationship(secondary="user_roles", lazy="selectin")
+    # Jointure explicite : user_roles.granted_by référence aussi users.
+    roles: Mapped[list[Role]] = relationship(
+        secondary="user_roles",
+        primaryjoin="User.id == UserRole.user_id",
+        secondaryjoin="Role.id == UserRole.role_id",
+        lazy="selectin",
+        viewonly=True,
+    )
 
     @property
     def role_codes(self) -> set[RoleCode]:

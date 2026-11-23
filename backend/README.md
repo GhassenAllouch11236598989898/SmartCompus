@@ -1,6 +1,6 @@
 # SmartCampus AI — Backend (epic SA-10 : données, base PostgreSQL et API catalogue)
 
-FastAPI + PostgreSQL/pgvector. Ce dépôt couvre le **modèle de données complet** (catalogue, candidatures, documents RAG), la **base PostgreSQL** (rôles à moindre privilège, migrations, données de démo) et l'**API catalogue** (formations, tarifs, conditions d'admission, comparaison).
+FastAPI + PostgreSQL 17/pgvector (`pgvector/pgvector:pg17`, configurable via `POSTGRES_IMAGE_TAG`). Ce dépôt couvre le **modèle de données complet** (catalogue, candidatures, documents RAG), la **base PostgreSQL** (rôles à moindre privilège, migrations, données de démo) et l'**API catalogue** (formations, tarifs, conditions d'admission, comparaison).
 
 > Hors périmètre de cet epic : `/auth/*`, `/me`, `/chat/*`, `/equivalences`, `/preinscriptions`, `/qcm/*`, `/rendez-vous`, `/dossiers/me`, `/responsable/*`, agents LangGraph, pipeline RAG, STT/TTS, emails. Les tables correspondantes existent déjà.
 

@@ -88,6 +88,8 @@ def register_error_handlers(app: FastAPI) -> None:
         message = exc.detail if isinstance(exc.detail, str) else code
         if exc.status_code == 404 and message == "Not Found":
             message = "Ressource introuvable."
+        if exc.status_code == 400 and message.startswith("There was an error parsing the body"):
+            message = "Corps de requête JSON invalide (vérifier la syntaxe et l'encodage UTF-8)."
         if exc.status_code == 405:
             message = "Méthode non autorisée (les formations s'archivent, elles ne se suppriment pas)."
         return JSONResponse(error_body(code, message), status_code=exc.status_code, headers=getattr(exc, "headers", None))
