@@ -96,7 +96,11 @@ export default function ChatPanel() {
       .catch(() => void startSession());
   }, [startSession]);
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, sending]);
+  // Corps en bloc : dans les navigateurs récents scrollIntoView() renvoie une Promise,
+  // que React prendrait pour une fonction de nettoyage (crash « destroy is not a function »).
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, sending]);
 
   async function send(text: string) {
     const content = text.trim();
