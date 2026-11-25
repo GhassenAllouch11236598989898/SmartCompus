@@ -33,7 +33,7 @@ def test_upgrade_creates_all_tables_views_and_extension(owner_db: Session):
     assert {"v_formations_public", "v_candidate_dossier_summary", "v_tuition_fees_public"} <= views
     assert owner_db.scalar(text("SELECT count(*) FROM pg_extension WHERE extname='vector'")) == 1
     version = owner_db.scalar(text("SELECT version_num FROM alembic_version"))
-    assert version == "0002_ai_views_and_grants"
+    assert version == "0003_conversation_memory"
 
 
 def test_enums_and_key_indexes_exist(owner_db: Session):

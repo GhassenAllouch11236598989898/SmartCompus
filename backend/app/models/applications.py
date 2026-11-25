@@ -242,6 +242,7 @@ class Conversation(IdMixin, TimestampMixin, DemoMixin, Base):
     __table_args__ = (
         CheckConstraint("candidate_id IS NULL OR attached_at IS NOT NULL", name="attached_has_date"),
         CheckConstraint("session_token_hash ~ '^[0-9a-f]{64}$'", name="session_token_sha256"),
+        CheckConstraint("jsonb_typeof(memory) = 'object'", name="memory_is_object"),
     )
 
     candidate_id: Mapped[int | None] = mapped_column(ForeignKey("candidates.id", ondelete="RESTRICT"), index=True)
@@ -253,6 +254,8 @@ class Conversation(IdMixin, TimestampMixin, DemoMixin, Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     attached_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # SA-37 — mémoire longue du chatbot (profil candidat, questions posées, langue) : voir app/llm/memory.py.
+    memory: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
 
     messages: Mapped[list["Message"]] = relationship(back_populates="conversation", order_by="Message.sequence")
 

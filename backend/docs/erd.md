@@ -226,6 +226,7 @@ erDiagram
         timestamp_with_time_zone started_at
         timestamp_with_time_zone last_message_at
         timestamp_with_time_zone attached_at
+        jsonb memory
         timestamp_with_time_zone created_at
         timestamp_with_time_zone updated_at
         boolean is_demo

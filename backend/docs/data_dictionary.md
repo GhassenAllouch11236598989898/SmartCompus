@@ -376,6 +376,7 @@ Conversation chatbot. Visiteur anonyme : candidate_id NULL, identifié par sessi
 | `started_at` | TIMESTAMP WITH TIME ZONE | non | now() |  |  |
 | `last_message_at` | TIMESTAMP WITH TIME ZONE | oui |  |  |  |
 | `attached_at` | TIMESTAMP WITH TIME ZONE | oui |  |  |  |
+| `memory` | JSONB | non | '{}'::jsonb |  |  |
 | `created_at` | TIMESTAMP WITH TIME ZONE | non | now() |  | Date de création (UTC, défaut now()). |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | non | now() |  | Date de dernière modification (trigger set_updated_at). |
 | `is_demo` | BOOLEAN | non | false |  | true = donnée FICTIVE de démonstration, à remplacer (voir SEED_DATA_NOTES.md). |
@@ -383,6 +384,7 @@ Conversation chatbot. Visiteur anonyme : candidate_id NULL, identifié par sessi
 Contraintes et index :
 
 - CHECK `ck_conversations_attached_has_date` : `candidate_id IS NULL OR attached_at IS NOT NULL`
+- CHECK `ck_conversations_memory_is_object` : `jsonb_typeof(memory) = 'object'`
 - CHECK `ck_conversations_session_token_sha256` : `session_token_hash ~ '^[0-9a-f]{64}$'`
 - INDEX `ix_conversations_candidate_id` (candidate_id)
 
