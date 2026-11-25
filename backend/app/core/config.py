@@ -30,7 +30,8 @@ class Settings(BaseSettings):
     
     # SA-25 : durée de vie d'une session visiteur, comptée depuis la dernière activité.
     guest_session_ttl_hours: int = Field(default=24, ge=1, le=720)
-
+    # SA-26 : nombre de messages récents renvoyés au LLM comme mémoire de la conversation.
+    conversation_memory_max_messages: int = Field(default=20, ge=1, le=200)
     # Dimension des embeddings pgvector (doit correspondre au modèle choisi par l'équipe RAG).
     embedding_dim: int = 1024
 
