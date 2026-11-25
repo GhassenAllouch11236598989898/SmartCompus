@@ -44,8 +44,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--memoire", action="store_true", help="afficher la mémoire après chaque tour")
     args = ap.parse_args(argv)
 
-    with httpx.Client(base_url=f"{args.url.rstrip('/')}/api/v1/chat", timeout=180) as http:
-        token = http.post("/sessions").raise_for_status().json()["session_token"]
+    with httpx.Client(base_url=f"{args.url.rstrip('/')}/api/v1", timeout=180) as http:
+        token = http.post("/sessions").raise_for_status().json()["session_token"]  # session visiteur SA-25
         headers = {"X-Session-Token": token}
         messages = iter(SCENARIOS[args.scenario]) if args.scenario else None
         while True:
@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
                 if not text:
                     continue
             start = time.perf_counter()
-            r = http.post("/messages", json={"content": text}, headers=headers)
+            r = http.post("/chat/messages", json={"content": text}, headers=headers)
             if r.status_code != 200:
                 print(f"[{r.status_code}] {r.json()['error']['message']}", file=sys.stderr)
                 continue

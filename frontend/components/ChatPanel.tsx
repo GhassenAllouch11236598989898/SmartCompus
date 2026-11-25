@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 // SA-36 / SA-37 — interface de chat branchée sur l'API /api/v1/chat (dialogue multi-tours avec le LLM).
+// La session visiteur vient de SA-25 (POST /api/v1/sessions, en-tête X-Session-Token).
 
 type Sender = "user" | "assistant";
 type ChatMessage = { sequence: number; sender: Sender; content: string; detected_language: string };
@@ -61,7 +62,7 @@ export default function ChatPanel() {
   const startSession = useCallback(async () => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/sessions`, { method: "POST" });
+      const res = await fetch(`${API_URL}/api/v1/sessions`, { method: "POST" });
       if (!res.ok) throw new Error(await errorMessage(res));
       const body = await res.json();
       localStorage.setItem(TOKEN_KEY, body.session_token);

@@ -3,9 +3,9 @@
 
 @base = http://localhost:8000/api/v1
 
-### 1. Démarrer une conversation visiteur -> copier session_token ci-dessous
+### 1. Session visiteur (SA-25) : le jeton est repris automatiquement ci-dessous
 # @name session
-POST {{base}}/chat/sessions
+POST {{base}}/sessions
 
 ###
 @token = {{session.response.body.session_token}}
@@ -39,7 +39,7 @@ X-Session-Token: {{token}}
 GET {{base}}/chat/memoire
 X-Session-Token: {{token}}
 
-### Erreur : session inconnue (404)
+### Erreur : session inconnue ou expirée (401)
 POST {{base}}/chat/messages
 X-Session-Token: jeton-inexistant-0000000000000000
 Content-Type: application/json

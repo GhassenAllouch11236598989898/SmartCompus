@@ -8,12 +8,6 @@ from pydantic import BaseModel, Field
 from app.models.applications import MessageLanguage, MessageSender
 
 
-class ChatSessionCreated(BaseModel):
-    conversation_id: int
-    session_token: str = Field(description="Jeton de session visiteur, renvoyé une seule fois. "
-                                           "À envoyer dans l'en-tête X-Session-Token. Seul son SHA-256 est stocké.")
-
-
 class ChatMessageIn(BaseModel):
     content: str = Field(min_length=1, max_length=10_000, examples=["9adech el licence info ?"])
 

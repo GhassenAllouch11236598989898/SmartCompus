@@ -2,7 +2,7 @@
 
 Un tour de conversation :
 
-1. retrouver la conversation par le hash du jeton de session (visiteur anonyme) ;
+1. la conversation est la session visiteur SA-25 (``app.services.sessions``, vérifiée par l'API) ;
 2. détecter la langue du message (``app.llm.language``) ;
 3. mettre à jour la mémoire longue (profil candidat, questions posées) ;
 4. construire le prompt : règles + catalogue + mémoire + fenêtre des derniers messages + message ;
@@ -13,7 +13,6 @@ Le contenu des messages n'est jamais journalisé.
 """
 
 import logging
-import secrets
 from collections.abc import Callable
 from datetime import UTC, datetime
 
@@ -22,40 +21,25 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.errors import ConflictError, NotFoundError, ServiceUnavailableError, UnprocessableError
-from app.core.security import hash_token
+from app.core.errors import ConflictError, ServiceUnavailableError, UnprocessableError
 from app.llm.client import ChatMessage, LLMClient, LLMError
 from app.llm.language import detect_language, language_label
-from app.llm.memory import ConversationMemory, HistoryItem, build_history, profile_from_llm
+from app.llm.memory import (
+    ConversationMemory,
+    HistoryItem,
+    build_history,
+    profile_from_llm,
+)
 from app.llm.prompts import CHAT_SYSTEM, PROFILE_EXTRACT_SYSTEM
 from app.llm.text import parse_json_object
 from app.models import Conversation, Message
 from app.models.applications import ConversationStatus, MessageLanguage, MessageSender
-from app.schemas.chat import CandidateMemory, ChatHistory, ChatMessageOut, ChatReply, ChatSessionCreated
+from app.schemas.chat import CandidateMemory, ChatHistory, ChatMessageOut, ChatReply
 from app.services.chat_context import catalogue_context
 
 logger = logging.getLogger("smartcampus.chat")
 
 ContextProvider = Callable[[Session], str]
-
-
-# ------------------------------------------------------------------ sessions
-def start_session(db: Session) -> ChatSessionCreated:
-    """Ouvre une conversation visiteur. Point de raccord avec les sessions visiteurs (SA-23 à SA-25)."""
-    token = secrets.token_urlsafe(32)
-    conversation = Conversation(session_token_hash=hash_token(token))
-    db.add(conversation)
-    db.commit()
-    return ChatSessionCreated(conversation_id=conversation.id, session_token=token)
-
-
-def get_conversation(db: Session, session_token: str) -> Conversation:
-    conversation = db.scalars(
-        select(Conversation).where(Conversation.session_token_hash == hash_token(session_token))
-    ).first()
-    if conversation is None:
-        raise NotFoundError("Session de conversation inconnue ou expirée.")
-    return conversation
 
 
 # ------------------------------------------------------------------ lecture

@@ -1,4 +1,4 @@
-"""SA-36 — LLM branché au backend : API /chat (sessions visiteurs, messages, historique, mémoire).
+"""SA-36 — LLM branché au backend : API /chat (messages, historique, mémoire) sur les sessions visiteurs SA-25.
 
 Base PostgreSQL réelle (transaction annulée) ; le LLM est remplacé par FakeLLMClient (aucun réseau)."""
 
@@ -33,13 +33,13 @@ def chat_client(db: Session, llm: FakeLLMClient) -> Iterator[TestClient]:
 
 @pytest.fixture
 def session_headers(chat_client: TestClient) -> dict[str, str]:
-    r = chat_client.post("/api/v1/chat/sessions")
+    r = chat_client.post("/api/v1/sessions")
     assert r.status_code == 201
     return {"X-Session-Token": r.json()["session_token"]}
 
 
 def test_create_session_stores_only_token_hash(chat_client, db: Session):
-    body = chat_client.post("/api/v1/chat/sessions").json()
+    body = chat_client.post("/api/v1/sessions").json()
     conv = db.get(Conversation, body["conversation_id"])
     assert len(body["session_token"]) >= 40
     assert conv.session_token_hash == hash_token(body["session_token"])
@@ -105,7 +105,7 @@ def test_history_and_memory_endpoints(chat_client, session_headers):
 
 def test_sessions_are_isolated(chat_client, session_headers, llm):
     chat_client.post("/api/v1/chat/messages", json={"content": "9rit bac maths w jebt 15"}, headers=session_headers)
-    other = {"X-Session-Token": chat_client.post("/api/v1/chat/sessions").json()["session_token"]}
+    other = {"X-Session-Token": chat_client.post("/api/v1/sessions").json()["session_token"]}
     chat_client.post("/api/v1/chat/messages", json={"content": "Bonjour"}, headers=other)
     assert len(llm.calls[-1]) == 2  # système + message : rien de l'autre visiteur
     assert "15" not in llm.calls[-1][0].content.split("MÉMOIRE")[1]
@@ -134,9 +134,9 @@ def test_empty_llm_answer_gets_fallback(chat_client, session_headers, llm):
 @pytest.mark.parametrize(
     ("headers", "payload", "status", "code"),
     [
-        ({}, {"content": "Bonjour"}, 422, "validation_error"),
-        ({"X-Session-Token": "x" * 43}, {"content": "Bonjour"}, 404, "not_found"),
-        ({"X-Session-Token": "court"}, {"content": "Bonjour"}, 422, "validation_error"),
+        ({}, {"content": "Bonjour"}, 401, "unauthorized"),
+        ({"X-Session-Token": "x" * 43}, {"content": "Bonjour"}, 401, "unauthorized"),
+        ({"X-Session-Token": "court"}, {"content": "Bonjour"}, 401, "unauthorized"),
     ],
 )
 def test_session_errors(chat_client, headers, payload, status, code):
@@ -151,14 +151,15 @@ def test_invalid_message(chat_client, session_headers, content, llm):
     assert llm.calls == []
 
 
-def test_closed_conversation_is_read_only(chat_client, session_headers, db: Session):
+def test_closed_conversation_is_refused(chat_client, session_headers, db: Session):
     conv = db.scalars(select(Conversation).where(
         Conversation.session_token_hash == hash_token(session_headers["X-Session-Token"]))).one()
     conv.status = "closed"
     db.flush()
+    # Session SA-25 fermée : plus d'accès au chat (401), il faut créer une nouvelle session.
     r = chat_client.post("/api/v1/chat/messages", json={"content": "Bonjour"}, headers=session_headers)
-    assert r.status_code == 409
-    assert chat_client.get("/api/v1/chat/messages", headers=session_headers).status_code == 200
+    assert r.status_code == 401
+    assert chat_client.get("/api/v1/chat/messages", headers=session_headers).status_code == 401
 
 
 def test_memory_column_must_be_an_object(db: Session):

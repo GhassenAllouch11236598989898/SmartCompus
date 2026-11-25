@@ -59,7 +59,7 @@ def small_window(monkeypatch):
 
 
 def _start(chat: TestClient) -> dict[str, str]:
-    return {"X-Session-Token": chat.post(f"{CHAT}/sessions").json()["session_token"]}
+    return {"X-Session-Token": chat.post("/api/v1/sessions").json()["session_token"]}
 
 
 def _say(chat: TestClient, headers: dict[str, str], text: str) -> dict:

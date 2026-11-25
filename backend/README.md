@@ -118,7 +118,7 @@ docker compose exec api python -m scripts.chat_demo --url http://localhost:8000 
 
 | Méthode | Route | Rôle |
 |---|---|---|
-| POST | `/chat/sessions` | ouvre une conversation visiteur et renvoie `session_token` (une seule fois, seul son SHA-256 est stocké) |
+| POST | `/sessions` | (SA-25) ouvre une session visiteur et renvoie `session_token`, à envoyer dans `X-Session-Token` |
 | POST | `/chat/messages` | en-tête `X-Session-Token`, corps `{"content": "..."}` : réponse du LLM, langue détectée, mémoire |
 | GET | `/chat/messages` | historique de la conversation |
 | GET | `/chat/memoire` | profil mémorisé (niveau, section, moyenne, intérêts, préférences, contraintes, projet, formations évoquées) |
@@ -132,8 +132,8 @@ docker compose exec api python -m scripts.chat_demo --url http://localhost:8000 
 4. appel au LLM. S'il est indisponible : `503 service_unavailable` et rien n'est enregistré ;
 5. enregistrement du message, de la réponse (avec leur langue) et de la mémoire.
 
-Le RAG (autre epic) remplacera le contexte catalogue (`app/services/chat_context.py`). Les sessions visiteurs
-SA-23 à SA-25 peuvent remplacer `start_session` / `get_conversation` dans `app/services/chat.py`.
+Les routes `/chat` réutilisent la session visiteur SA-25 (`GuestSession` : 401 si absente, fermée ou expirée ;
+chaque message prolonge la session). Le RAG (autre epic) remplacera le contexte catalogue (`app/services/chat_context.py`).
 
 Variables : `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`, `LLM_TIMEOUT_S`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`,
 `LLM_MEMORY_MAX_MESSAGES`, `LLM_MEMORY_MAX_CHARS`, `LLM_MEMORY_EXTRACTION` (`regles` ou `llm`), `LLM_PROVIDER=fake`
