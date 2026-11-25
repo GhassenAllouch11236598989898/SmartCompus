@@ -46,6 +46,16 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       RUN_SEED: ${RUN_SEED:-true}
+      # LLM (SA-30) : par défaut Ollama lancé sur la machine hôte.
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai_compatible}
+      LLM_BASE_URL: ${LLM_DOCKER_BASE_URL:-http://host.docker.internal:11434/v1}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b-instruct}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_TIMEOUT_S: ${LLM_TIMEOUT_S:-60}
+      LLM_MEMORY_MAX_MESSAGES: ${LLM_MEMORY_MAX_MESSAGES:-12}
+      LLM_MEMORY_EXTRACTION: ${LLM_MEMORY_EXTRACTION:-regles}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${API_HOST_PORT:-8000}:8000"
     healthcheck:

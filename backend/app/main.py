@@ -20,9 +20,11 @@ def create_app() -> FastAPI:
         description=(
             "API SmartCampus AI — epic SA-10 : catalogue des formations, tarifs officiels et conditions "
             "d'admission. Toutes les informations du catalogue sont traçables jusqu'à leur document source. "
-            "Les routes d'écriture exigent un JWT (rôle admin ou responsable de l'établissement)."
+            "Les routes d'écriture exigent un JWT (rôle admin ou responsable de l'établissement). "
+            "Epic SA-30 : chatbot multi-tours (/chat) branché sur un LLM open-source OpenAI-compatible, "
+            "avec mémoire conversationnelle du candidat."
         ),
-        version="0.2.0",
+        version="0.3.0",
     )
     app.add_middleware(
         CORSMiddleware,

@@ -1,0 +1,47 @@
+### SmartCampus AI — chatbot multi-tours (SA-36 / SA-37 / SA-38)
+### (VS Code « REST Client » ou JetBrains HTTP Client). Prérequis : serveur LLM lancé (ollama serve).
+
+@base = http://localhost:8000/api/v1
+
+### 1. Démarrer une conversation visiteur -> copier session_token ci-dessous
+# @name session
+POST {{base}}/chat/sessions
+
+###
+@token = {{session.response.body.session_token}}
+
+### 2. Premier message (Arabizi)
+POST {{base}}/chat/messages
+X-Session-Token: {{token}}
+Content-Type: application/json
+
+{"content": "aslema, 9rit bac maths w jebt 15 de moyenne"}
+
+### 3. Deuxième tour : le bot se souvient de la moyenne et du bac
+POST {{base}}/chat/messages
+X-Session-Token: {{token}}
+Content-Type: application/json
+
+{"content": "nheb el informatique ama mouch mitakked bin prepa w licence, chnowa tnasa7ni ?"}
+
+### 4. Changement de langue (dialecte tunisien en graphie arabe)
+POST {{base}}/chat/messages
+X-Session-Token: {{token}}
+Content-Type: application/json
+
+{"content": "قداش الفلوس متاع البريبا ؟"}
+
+### 5. Historique
+GET {{base}}/chat/messages
+X-Session-Token: {{token}}
+
+### 6. Mémoire du candidat (profil, questions posées, langue)
+GET {{base}}/chat/memoire
+X-Session-Token: {{token}}
+
+### Erreur : session inconnue (404)
+POST {{base}}/chat/messages
+X-Session-Token: jeton-inexistant-0000000000000000
+Content-Type: application/json
+
+{"content": "Bonjour"}

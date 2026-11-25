@@ -22,6 +22,7 @@ _STATUS_CODES = {
     409: "conflict",
     422: "validation_error",
     429: "too_many_requests",
+    503: "service_unavailable",
 }
 
 
@@ -55,6 +56,10 @@ class ConflictError(AppError):
 
 class UnprocessableError(AppError):
     status_code, code = 422, "validation_error"
+
+
+class ServiceUnavailableError(AppError):
+    status_code, code = 503, "service_unavailable"
 
 
 def error_body(code: str, message: str, details: Any = None) -> dict[str, Any]:

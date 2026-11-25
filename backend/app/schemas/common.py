@@ -49,4 +49,5 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     404: {"model": ErrorResponse, "description": "Ressource introuvable"},
     409: {"model": ErrorResponse, "description": "Conflit (code déjà utilisé)"},
     422: {"model": ErrorResponse, "description": "Données invalides"},
+    503: {"model": ErrorResponse, "description": "Service LLM indisponible (réessayer)"},
 }

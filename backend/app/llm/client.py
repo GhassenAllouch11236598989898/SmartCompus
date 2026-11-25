@@ -15,9 +15,12 @@ import re
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Literal, Protocol
 
 import httpx
+
+from app.core.config import get_settings
 
 logger = logging.getLogger("smartcampus.llm")
 
@@ -185,3 +188,19 @@ class FakeLLMClient:
         return LLMResponse(content=clean_completion(content), model=self.model, latency_ms=1.0,
                            prompt_tokens=sum(len(m.content) // 4 for m in messages),
                            completion_tokens=len(content) // 4, finish_reason="stop")
+
+
+@lru_cache
+def get_llm_client() -> LLMClient:
+    """Client LLM partagé par l'application (dépendance FastAPI, remplaçable dans les tests)."""
+    settings = get_settings()
+    if settings.llm_provider == "fake":
+        return FakeLLMClient(model="fake-llm")
+    return OpenAICompatibleClient(
+        settings.llm_base_url,
+        settings.llm_model,
+        api_key=settings.llm_api_key,
+        timeout_s=settings.llm_timeout_s,
+        temperature=settings.llm_temperature,
+        max_tokens=settings.llm_max_tokens,
+    )
