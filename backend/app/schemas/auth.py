@@ -31,7 +31,8 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int = Field(description="Durée de validité du jeton, en secondes.")
     user: UserOut
-
+    # SA-29 : conversation invitée rattachée au compte lors de cette inscription/connexion (sinon null).
+    attached_conversation_id: int | None = None
 
 class RolesUpdate(BaseModel):
     roles: list[RoleCode] = Field(min_length=1, description="Liste complète des rôles de l'utilisateur.")
