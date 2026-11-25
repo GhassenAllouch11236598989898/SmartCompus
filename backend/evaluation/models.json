@@ -1,0 +1,36 @@
+{
+  "_commentaire": "Modèles candidats SA-33. base_url : serveur OpenAI-compatible (Ollama par défaut). api_key_env : nom de la variable d'environnement contenant la clé (jamais la clé elle-même). adaptabilite (0..1) : licence + faisabilité QLoRA sur 1 GPU 16 Go, notée à la main dans docs/llm_selection.md.",
+  "criteres": {
+    "qualite_reponses": 0.20,
+    "comprehension_dialecte": 0.30,
+    "intentions": 0.10,
+    "fidelite_langue": 0.10,
+    "honnetete": 0.10,
+    "latence": 0.10,
+    "adaptabilite": 0.10
+  },
+  "modeles": [
+    {"nom": "qwen2.5-7b", "modele": "qwen2.5:7b-instruct", "base_url": "http://localhost:11434/v1",
+     "hf_id": "Qwen/Qwen2.5-7B-Instruct", "params_b": 7.6, "licence": "Apache-2.0", "vram_q4_go": 5.5,
+     "adaptabilite": 1.0, "actif": true},
+    {"nom": "qwen3-8b", "modele": "qwen3:8b", "base_url": "http://localhost:11434/v1",
+     "hf_id": "Qwen/Qwen3-8B", "params_b": 8.2, "licence": "Apache-2.0", "vram_q4_go": 6.0,
+     "adaptabilite": 1.0, "actif": true},
+    {"nom": "llama3.1-8b", "modele": "llama3.1:8b", "base_url": "http://localhost:11434/v1",
+     "hf_id": "meta-llama/Llama-3.1-8B-Instruct", "params_b": 8.0, "licence": "Llama 3.1 Community", "vram_q4_go": 5.5,
+     "adaptabilite": 0.8, "actif": true},
+    {"nom": "gemma2-9b", "modele": "gemma2:9b", "base_url": "http://localhost:11434/v1",
+     "hf_id": "google/gemma-2-9b-it", "params_b": 9.2, "licence": "Gemma Terms of Use", "vram_q4_go": 6.5,
+     "adaptabilite": 0.7, "actif": true},
+    {"nom": "aya-expanse-8b", "modele": "aya-expanse:8b", "base_url": "http://localhost:11434/v1",
+     "hf_id": "CohereForAI/aya-expanse-8b", "params_b": 8.0, "licence": "CC-BY-NC-4.0", "vram_q4_go": 5.5,
+     "adaptabilite": 0.5, "actif": true},
+    {"nom": "mistral-7b", "modele": "mistral:7b-instruct", "base_url": "http://localhost:11434/v1",
+     "hf_id": "mistralai/Mistral-7B-Instruct-v0.3", "params_b": 7.2, "licence": "Apache-2.0", "vram_q4_go": 4.5,
+     "adaptabilite": 1.0, "actif": true},
+    {"nom": "atlas-chat-9b", "modele": "MBZUAI-Paris/Atlas-Chat-9B", "base_url": "http://localhost:8001/v1",
+     "hf_id": "MBZUAI-Paris/Atlas-Chat-9B", "params_b": 9.2, "licence": "Gemma Terms of Use", "vram_q4_go": 6.5,
+     "adaptabilite": 0.7, "actif": false,
+     "_note": "Darija marocaine (proche du tunisien). Pas de tag Ollama officiel : servir avec vLLM sur le port 8001."}
+  ]
+}
