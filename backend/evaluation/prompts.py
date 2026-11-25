@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from app.llm.prompts import PROFILE_EXTRACT_SYSTEM
+
 DATA_DIR = Path(__file__).parent / "data"
 
 INTENTIONS = (
@@ -35,10 +37,8 @@ Réponds UNIQUEMENT par un objet JSON : {{"intention": "...", "langue": "..."}}
 TRANSLATE_SYSTEM = """Traduis fidèlement en français le message suivant, écrit en dialecte tunisien (lettres arabes ou Arabizi) ou en mélange avec le français.
 Réponds UNIQUEMENT par la traduction française, sans commentaire."""
 
-EXTRACT_SYSTEM = f"""Extrais du message d'un candidat les informations de profil utiles à l'orientation.
-Réponds UNIQUEMENT par un objet JSON avec les clés présentes dans le message parmi : {", ".join(SLOTS)}.
-Valeurs en français, courtes ; interets, preferences et contraintes sont des listes. N'ajoute pas de clé absente du message.
-Exemple : "9rit bac info w nheb el web" -> {{"section_bac": "informatique", "interets": ["développement web"]}}"""
+# Même prompt d'extraction que le backend (mémoire du candidat, SA-37).
+EXTRACT_SYSTEM = PROFILE_EXTRACT_SYSTEM
 
 JUDGE_SYSTEM = """Tu es un évaluateur strict. On te donne un CONTEXTE officiel, la QUESTION d'un candidat et la RÉPONSE d'un assistant.
 Note la réponse de 1 à 5 sur chaque critère :

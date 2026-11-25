@@ -38,7 +38,7 @@ MSA_MARKERS = frozenset({
     "الرسوم", "شروط", "القبول",
 })
 ARABIZI_MARKERS = frozenset({
-    "chnowa", "chnowa", "chnoua", "chniya", "chneya", "chnia", "chnou", "kifech", "kifach", "kifeh",
+    "chnowa", "chnoua", "chniya", "chneya", "chnia", "chnou", "kifech", "kifach", "kifeh",
     "9adech", "qadech", "adech", "3lech", "alech", "wa9tech", "waqtech", "win", "chkoun", "chkon",
     "barcha", "barsha", "yesser", "bech", "bch", "mte3", "mta3", "mtaa", "famma", "fama", "taw", "tawa",
     "nheb", "n7eb", "nhib", "n7ib", "nejem", "nnajem", "najem", "na3ref", "n3ref", "mouch", "mech",
@@ -47,9 +47,9 @@ ARABIZI_MARKERS = frozenset({
     "ena", "inti", "enti", "intouma", "houa", "hiya", "kima", "kan", "ken", "barka", "hakka", "hedha",
     "hedhi", "yezzi", "5ater", "khater", "nchouf", "tnajem", "ba3d", "9bal", "kbal", "lazem", "lezem",
     "wela", "walla", "ama", "chnaya", "fel", "fil", "mel", "mil", "3al", "lel", "nemchi", "ne5dem",
-    "na9ra", "inchallah", "n7ebb", "nheb", "9raya", "9ari", "fi", "w", "m3a", "ma3", "jem3a", "nwalli",
+    "na9ra", "inchallah", "n7ebb", "9raya", "9ari", "fi", "w", "m3a", "ma3", "jem3a", "nwalli",
     "chnouma", "9a3ed", "nsajel", "nsajjel", "flous", "soum", "bel", "bil", "elli", "illi", "el", "ya",
-    "chnia", "nod5ol", "nodkhol", "lel", "far9", "tnasa7ni", "tnasba7li", "nwalli", "mitakked", "bin",
+    "nod5ol", "nodkhol", "far9", "tnasa7ni", "tnasba7li", "mitakked", "bin",
 })
 FRENCH_MARKERS = frozenset({
     "le", "la", "les", "un", "une", "des", "du", "de", "et", "est", "je", "vous", "pour", "quels",
