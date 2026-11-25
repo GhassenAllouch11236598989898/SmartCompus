@@ -2,7 +2,9 @@
 
 FastAPI + PostgreSQL 17/pgvector (`pgvector/pgvector:pg17`, configurable via `POSTGRES_IMAGE_TAG`). Ce dépôt couvre le **modèle de données complet** (catalogue, candidatures, documents RAG), la **base PostgreSQL** (rôles à moindre privilège, migrations, données de démo) et l'**API catalogue** (formations, tarifs, conditions d'admission, comparaison).
 
-> Hors périmètre de cet epic : `/auth/*`, `/me`, `/chat/*`, `/equivalences`, `/preinscriptions`, `/qcm/*`, `/rendez-vous`, `/dossiers/me`, `/responsable/*`, agents LangGraph, pipeline RAG, STT/TTS, emails. Les tables correspondantes existent déjà.
+> Epic **SA-30** (sélection et intégration du LLM) : chatbot multi-tours `/chat/*` et banc d'évaluation des LLM, voir [section 6](#6-chatbot-llm-epic-sa-30).
+>
+> Hors périmètre : `/auth/*`, `/me`, `/equivalences`, `/preinscriptions`, `/qcm/*`, `/rendez-vous`, `/dossiers/me`, `/responsable/*`, agents LangGraph, pipeline RAG, STT/TTS, emails. Les tables correspondantes existent déjà.
 
 ## 1. Démarrage (une commande)
 
@@ -101,18 +103,59 @@ Conventions :
 - erreurs au format `{"error": {"code", "message", "details"}}` ;
 - en-tête `X-Response-Time-ms` sur chaque réponse.
 
-## 6. Structure
+## 6. Chatbot LLM (epic SA-30)
+
+Le backend parle à un **LLM open-source** servi par un serveur OpenAI-compatible (Ollama, vLLM, TGI...).
+Modèle retenu et justification : [docs/llm_selection.md](docs/llm_selection.md) ; banc de comparaison :
+[evaluation/README.md](evaluation/README.md).
+
+```powershell
+ollama pull qwen2.5:7b-instruct      # une fois (≈ 4,7 Go)
+ollama serve                         # http://localhost:11434/v1
+docker compose up -d --build         # l'API joint Ollama via host.docker.internal
+docker compose exec api python -m scripts.chat_demo --url http://localhost:8000 --scenario orientation --memoire
+```
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| POST | `/chat/sessions` | ouvre une conversation visiteur et renvoie `session_token` (une seule fois, seul son SHA-256 est stocké) |
+| POST | `/chat/messages` | en-tête `X-Session-Token`, corps `{"content": "..."}` : réponse du LLM, langue détectée, mémoire |
+| GET | `/chat/messages` | historique de la conversation |
+| GET | `/chat/memoire` | profil mémorisé (niveau, section, moyenne, intérêts, préférences, contraintes, projet, formations évoquées) |
+
+À chaque message (SA-36 / SA-37) :
+
+1. détection de la langue : français, tunisien en graphie arabe, Arabizi, mélange (`app/llm/language.py`) ;
+2. mise à jour de la **mémoire longue** du candidat (`conversations.memory`, migration 0003) ;
+3. prompt = règles (pas d'invention, répondre dans la langue du candidat) + **catalogue publié lu en base**
+   (frais, conditions, débouchés, passerelles, sources) + mémoire + **fenêtre des derniers messages** ;
+4. appel au LLM. S'il est indisponible : `503 service_unavailable` et rien n'est enregistré ;
+5. enregistrement du message, de la réponse (avec leur langue) et de la mémoire.
+
+Le RAG (autre epic) remplacera le contexte catalogue (`app/services/chat_context.py`). Les sessions visiteurs
+SA-23 à SA-25 peuvent remplacer `start_session` / `get_conversation` dans `app/services/chat.py`.
+
+Variables : `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY`, `LLM_TIMEOUT_S`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`,
+`LLM_MEMORY_MAX_MESSAGES`, `LLM_MEMORY_MAX_CHARS`, `LLM_MEMORY_EXTRACTION` (`regles` ou `llm`), `LLM_PROVIDER=fake`
+(LLM factice, sans serveur). Requêtes d'exemple : [requests/chat.http](requests/chat.http).
+
+Tests du dialogue (SA-38) : `tests/test_chat_api.py`, `tests/test_dialogue_multitours.py` (LLM factice) ;
+avec un vrai LLM : `LLM_LIVE_TESTS=1 pytest -m llm_live -s`.
+
+## 7. Structure
 
 ```text
 backend/
 ├── app/
+│   ├── llm/             client LLM OpenAI-compatible, détection de langue, prompts, mémoire (SA-30)
 │   ├── core/            config, database (engines), security (bcrypt/JWT), errors, ai_sql (garde-fou SQL IA)
 │   ├── models/          SQLAlchemy : catalog (SA-12), identity + applications (SA-13), documents (SA-14)
 │   ├── schemas/         Pydantic v2 (pagination, sources, formations/tarifs/conditions)
 │   ├── repositories/    requêtes SQL (programs, dossier_scope = périmètre des responsables)
 │   ├── services/        règles métier (visibilité, RBAC par établissement, archivage, audit)
-│   └── api/             deps (JWT/RBAC) + v1/endpoints (health, formations)
-├── alembic/versions/    0001 schéma + triggers, 0002 vues ai_views + privilèges
+│   └── api/             deps (JWT/RBAC) + v1/endpoints (health, formations, chat)
+├── alembic/versions/    0001 schéma + triggers, 0002 vues ai_views + privilèges, 0003 mémoire des conversations
+├── evaluation/          SA-31 : questions, jeu dialecte/Arabizi, comparaison des LLM, notebook Colab
 ├── seeds/seed.py        données DEMO idempotentes
 ├── docker/              init Postgres (rôles, bases, pgvector) + entrypoint API
 ├── docs/                erd.md, data_dictionary.md, normalisation.md, security.md, backlog_suggestions.md
@@ -122,11 +165,12 @@ backend/
 ├── docker-compose.yml, Dockerfile, .env.example, SEED_DATA_NOTES.md
 ```
 
-## 7. Documentation
+## 8. Documentation
 
 - [docs/erd.md](docs/erd.md) : diagrammes Mermaid (générés)
 - [docs/data_dictionary.md](docs/data_dictionary.md) : dictionnaire de données (généré)
 - [docs/normalisation.md](docs/normalisation.md) : normalisation et règles en base
+- [docs/llm_selection.md](docs/llm_selection.md) : sélection du LLM (SA-31)
 - [docs/security.md](docs/security.md) : rôles PostgreSQL, outil SQL de l'IA, données personnelles
 - [SEED_DATA_NOTES.md](SEED_DATA_NOTES.md) : **données fictives à remplacer**
 - [docs/backlog_suggestions.md](docs/backlog_suggestions.md) : idées hors sprint
