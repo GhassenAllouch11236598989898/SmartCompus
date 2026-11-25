@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 60
 
     cors_origins: str = "http://localhost:3000"
+    
+    # SA-25 : durée de vie d'une session visiteur, comptée depuis la dernière activité.
+    guest_session_ttl_hours: int = Field(default=24, ge=1, le=720)
 
     # Dimension des embeddings pgvector (doit correspondre au modèle choisi par l'équipe RAG).
     embedding_dim: int = 1024
